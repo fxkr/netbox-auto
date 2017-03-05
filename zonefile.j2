@@ -1,0 +1,20 @@
+$ORIGIN {{ dns_zone }}.
+$TTL 3600
+
+@ IN SOA {{ dns_zone }}. {{ dns_contact }}. (
+                        {{ dns_serial }} ; serial
+                        {{ dns_refresh_time }}         ; refresh
+                        {{ dns_retry_time }}         ; retry
+                        {{ dns_expire_time }}         ; expire
+                        {{ dns_negative_cache_time }} )       ; negative cache
+
+{% if origin_records %}
+{% for type, value in origin_records -%}
+{{ " " * 32 }} {{ "%-4s" % type }} {{ value }}.
+{% endfor -%}
+{% endif %}
+
+; Auto-generated from {{ dns_source }}
+{% for name, type, ip in records -%}
+{{ "%-32s" % name }} {{ "%-4s" % type }} {{ ip }}
+{% endfor -%}

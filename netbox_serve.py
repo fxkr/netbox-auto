@@ -13,7 +13,11 @@ from flask import Flask, g, jsonify
 from flask_basicauth import BasicAuth
 
 
+psycopg2.extras.register_ipaddress()
+
+
 app = Flask(__name__)
+app.config.from_mapping(**os.environ)
 basic_auth = BasicAuth(app)
 
 
@@ -67,10 +71,6 @@ def get_zone():
 
 
 def main():
-
-    psycopg2.extras.register_ipaddress()
-
-    app.config.from_mapping(**os.environ)
     app.run(debug=True)
 
 

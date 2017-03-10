@@ -1,0 +1,6 @@
+jinja2
+psycopg2==2.7
+flask
+Flask-BasicAuth
+dnspython
+gunicorn

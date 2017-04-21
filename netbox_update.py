@@ -27,10 +27,13 @@ def main():
     reverse_records = {}
 
     data = resp.json()
-    for name, ip_str in data.items():
+    for name, data in data.items():
+        ip_str = data["primary"]
         ip = ipaddress.ip_address(ip_str)
         block = ".".join(reversed(ip.compressed.split(".")[:3]))
         forward_records.append((name, "A", ip.compressed))
+        for cname in data.get("cnames", []):
+            forward_records.append((cname, "CNAME", name))
         if block not in reverse_records:
             reverse_records[block] = []
         reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))

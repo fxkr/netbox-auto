@@ -73,7 +73,7 @@ def update_zonefile(path, origin_records, zone_name, records):
     }
 
     env = jinja2.Environment(loader=jinja2.FileSystemLoader("."), undefined=jinja2.StrictUndefined)
-    text = env.get_template("forward.j2").render(vars)
+    text = env.get_template("zonefile.j2").render(vars)
 
     with tempfile.NamedTemporaryFile(dir=os.path.dirname(path), delete=False) as temp_file:
         temp_file.write(env.get_template("zonefile.j2").render(vars).encode("utf-8"))

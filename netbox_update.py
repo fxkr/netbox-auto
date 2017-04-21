@@ -32,7 +32,7 @@ def main():
         forward_records.append((name, "A", ip.compressed))
         if block not in reverse_records:
             reverse_records[block] = []
-        reverse_records[block].append((ip.reverse_pointer + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))
+        reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))
 
     origin_records = [("NS", name.strip()) for name in os.environ["DNS_SERVERS"].split(",")]
 
@@ -78,6 +78,12 @@ def update_zonefile(path, origin_records, zone_name, records):
     with tempfile.NamedTemporaryFile(dir=os.path.dirname(path), delete=False) as temp_file:
         temp_file.write(env.get_template("zonefile.j2").render(vars).encode("utf-8"))
     os.replace(temp_file.name, path)
+
+
+# Copied from Python 3.5 standard library for Python 3.4 compatibility
+def _ipv4_reverse_pointer(self):
+    reverse_octets = str(self).split('.')[::-1]
+    return '.'.join(reverse_octets) + '.in-addr.arpa'
 
 
 if __name__ == "__main__":

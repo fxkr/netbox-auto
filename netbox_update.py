@@ -37,10 +37,11 @@ def main():
 
     origin_records = [("NS", name.strip()) for name in os.environ["DNS_SERVERS"].split(",")]
 
-    update_zonefile(os.path.join(os.environ["DNS_DIRECTORY"], os.environ["DNS_ZONE"]), origin_records, os.environ["DNS_ZONE"], forward_records)
+    update_zonefile(os.path.join(os.environ["DNS_DIRECTORY"], os.environ["DNS_ZONE"], "zone.db"), origin_records, os.environ["DNS_ZONE"], forward_records)
 
     for block, block_reverse_records in reverse_records.items():
-        update_zonefile(os.path.join(os.environ["DNS_DIRECTORY"], block), origin_records, block + ".in-addr.arpa", block_reverse_records)
+        block += ".in-addr.arpa"
+        update_zonefile(os.path.join(os.environ["DNS_DIRECTORY"], block, "zone.db"), origin_records, block, block_reverse_records)
 
 
 def update_zonefile(path, origin_records, zone_name, records):

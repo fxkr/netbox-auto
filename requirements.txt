@@ -4,3 +4,4 @@ flask
 Flask-BasicAuth
 dnspython
 gunicorn
+requests

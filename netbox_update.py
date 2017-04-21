@@ -5,6 +5,7 @@ import ipaddress
 import os
 import sys
 import tempfile
+import traceback
 
 import jinja2
 import requests
@@ -44,10 +45,14 @@ def main():
 
 def update_zonefile(path, origin_records, zone_name, records):
 
-    zone = dns.zone.from_text(open(path))
-    origin_node = zone.get("@")
-    soa_rdataset = origin_node.get_rdataset(dns.rdataclass.IN, dns.rdatatype.SOA)
-    previous_serial = soa_rdataset.items[0].serial
+    try:
+        zone = dns.zone.from_text(open(path))
+        origin_node = zone.get("@")
+        soa_rdataset = origin_node.get_rdataset(dns.rdataclass.IN, dns.rdatatype.SOA)
+        previous_serial = soa_rdataset.items[0].serial
+    except:
+        traceback.print_exc()
+        previous_serial = 0
 
     new_serial = todays_serial = int(datetime.datetime.today().strftime("%Y%m%d00"))
     if os.path.exists(path):

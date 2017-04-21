@@ -41,7 +41,7 @@ def teardown_db(exception):
         db.close()
 
 
-@app.route("/mappings")
+@app.route("/name-to-ip")
 @basic_auth.required
 def get_zone():
 

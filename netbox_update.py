@@ -27,13 +27,13 @@ def main():
     reverse_records = {}
 
     data = resp.json()
-    for name, data in sorted(data.items(), key=lambda x: (ipaddress.ip_address(x[1]["primary"]), x[0])):
+    for name, data in sorted(data.items(), key=lambda x: (ip_str_key(x[1]["primary"]), x[0])):
         ip_str = data["primary"]
         primary_ip = ipaddress.ip_address(ip_str)
         forward_records.append((name, "A", primary_ip.compressed))
         for cname in sorted(data.get("cnames", [])):
             forward_records.append((cname, "CNAME", name))
-        for ip in sorted([primary_ip] + [ipaddress.ip_address(i) for i in data.get("secondary_ips", [])]):
+        for ip in sorted([primary_ip] + [ipaddress.ip_address(i) for i in data.get("secondary_ips", [])], key=ip_key):
             block = ".".join(reversed(ip.compressed.split(".")[:3]))
             if block not in reverse_records:
                 reverse_records[block] = []
@@ -94,6 +94,12 @@ def update_zonefile(path, origin_records, zone_name, records):
 def _ipv4_reverse_pointer(self):
     reverse_octets = str(self).split('.')[::-1]
     return '.'.join(reverse_octets) + '.in-addr.arpa'
+
+# ipaddress.__cmp__ is broken, it sorts ".30" between ".3" and ".4" :-(
+def ip_key(ip):
+    return tuple(int(part) for part in ip.compressed.split('.'))
+def ip_str_key(ip_str):
+    return ip_key(ipaddress.ip_address(ip_str))
 
 
 if __name__ == "__main__":

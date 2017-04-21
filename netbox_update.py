@@ -2,6 +2,7 @@
 
 import datetime
 import ipaddress
+import json
 import os
 import sys
 import tempfile
@@ -26,6 +27,11 @@ def main():
     forward_records = []
     reverse_records = {}
 
+    origin_records = []
+    for name, ip in json.loads(os.environ["DNS_SERVERS"]).items():
+        origin_records.append(("NS", name.strip() + "." + os.environ["DNS_ZONE"] + "."))
+        forward_records.append((name.strip(), "A", ip))
+
     data = resp.json()
     for name, data in sorted(data.items(), key=lambda x: (ip_str_key(x[1]["primary"]), x[0])):
         ip_str = data["primary"]
@@ -38,8 +44,6 @@ def main():
             if block not in reverse_records:
                 reverse_records[block] = []
             reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + "." + os.environ["DNS_ZONE"] + "."))
-
-    origin_records = [("NS", name.strip()) for name in os.environ["DNS_SERVERS"].split(",")]
 
     update_zonefile(os.path.join(os.environ["DNS_DIRECTORY"], os.environ["DNS_ZONE"], "zone.db"), origin_records, os.environ["DNS_ZONE"], forward_records)
 

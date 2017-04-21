@@ -10,7 +10,7 @@ $TTL 3600
 
 {% if origin_records %}
 {% for type, value in origin_records -%}
-{{ " " * 32 }} {{ "%-4s" % type }} {{ value }}.
+{{ " " * 32 }} {{ "%-4s" % type }} {{ value }}
 {% endfor -%}
 {% endif %}
 

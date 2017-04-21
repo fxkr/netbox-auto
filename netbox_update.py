@@ -37,7 +37,7 @@ def main():
             block = ".".join(reversed(ip.compressed.split(".")[:3]))
             if block not in reverse_records:
                 reverse_records[block] = []
-            reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))
+            reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + "." + os.environ["DNS_ZONE"] + "."))
 
     origin_records = [("NS", name.strip()) for name in os.environ["DNS_SERVERS"].split(",")]
 

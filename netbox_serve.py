@@ -45,13 +45,14 @@ def teardown_db(exception):
 @basic_auth.required
 def get_zone():
 
-    records = {}
+    results = {}
 
     with get_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
         cur.execute("""\
             SELECT DISTINCT
                 ipam_ipaddress.address as i_address,
-                dcim_device.name as d_name
+                dcim_device.name as d_name,
+                dcim_device.comments as d_comments
             FROM
                 ipam_ipaddress
             JOIN dcim_device ON ipam_ipaddress.id = dcim_device.primary_ip4_id
@@ -66,8 +67,25 @@ def get_zone():
                 dcim_device.name ASC
         """, (app.config["NETBOX_TENANT_SLUG"],))
 
-        result = {row["d_name"].lower(): row["i_address"].ip.compressed for row in cur}
-        return jsonify(result)
+        for row in cur:
+            result = {"primary": row["i_address"].ip.compressed}
+            if row["d_comments"]:
+                for line in row["d_comments"].split("\n"):
+                    line = line.strip()
+                    if not line.startswith("`{") or not line.endswith("}`"):
+                        continue
+                    line = line[1:-1]
+                    try:
+                        obj = json.loads(line)
+                    except:
+                        continue
+                    if not isinstance(obj, dict):
+                        continue
+                    if "cnames" in obj and isinstance(obj["cnames"], list) and all(isinstance(x, str) for x in obj["cnames"]):
+                        result["cnames"] = obj["cnames"]
+            results[row["d_name"].lower()] = result
+
+    return jsonify(results)
 
 
 def main():

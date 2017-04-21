@@ -29,14 +29,15 @@ def main():
     data = resp.json()
     for name, data in data.items():
         ip_str = data["primary"]
-        ip = ipaddress.ip_address(ip_str)
-        block = ".".join(reversed(ip.compressed.split(".")[:3]))
-        forward_records.append((name, "A", ip.compressed))
+        primary_ip = ipaddress.ip_address(ip_str)
+        forward_records.append((name, "A", primary_ip.compressed))
         for cname in data.get("cnames", []):
             forward_records.append((cname, "CNAME", name))
-        if block not in reverse_records:
-            reverse_records[block] = []
-        reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))
+        for ip in [primary_ip] + [ipaddress.ip_address(i) for i in data.get("secondary_ips", [])]:
+            block = ".".join(reversed(ip.compressed.split(".")[:3]))
+            if block not in reverse_records:
+                reverse_records[block] = []
+            reverse_records[block].append((_ipv4_reverse_pointer(ip) + ".", "PTR", name + os.environ["DNS_ZONE"] + "."))
 
     origin_records = [("NS", name.strip()) for name in os.environ["DNS_SERVERS"].split(",")]
 

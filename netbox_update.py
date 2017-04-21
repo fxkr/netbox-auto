@@ -92,6 +92,7 @@ def update_zonefile(path, origin_records, zone_name, records):
     with tempfile.NamedTemporaryFile(dir=os.path.dirname(path), delete=False) as temp_file:
         temp_file.write(env.get_template("zonefile.j2").render(vars).encode("utf-8"))
     os.replace(temp_file.name, path)
+    os.chmod(path, 420) # dec 420 == oct 644
 
 
 # Copied from Python 3.5 standard library for Python 3.4 compatibility

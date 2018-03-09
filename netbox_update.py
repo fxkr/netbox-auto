@@ -34,6 +34,9 @@ def main():
 
     data = resp.json()
     for name, data in sorted(data.items(), key=lambda x: (ip_str_key(x[1]["primary"]), x[0])):
+        if "override" in data:
+            forward_records.extend(data["override"])
+            continue
         ip_str = data["primary"]
         primary_ip = ipaddress.ip_address(ip_str)
         forward_records.append((name, "A", primary_ip.compressed))
